@@ -27,13 +27,7 @@ app.get("/", (req, res) => {
     timeZone: "Asia/Kolkata",
   });
 
-  const indianTime = now.toLocaleTimeString("en-IN", {
-    timeZone: "Asia/Kolkata",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
+  const indianTime = now.toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }),
 
   res.send(`we are 19 — Date: ${indianDate}, Time: ${indianTime}`);
 });
