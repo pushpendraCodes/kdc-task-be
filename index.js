@@ -21,8 +21,23 @@ app.use(cors({
 const ProductRoutes = require("./routes/ProductRoutes");
 
 app.get("/", (req, res) => {
-    res.send("we are 19");
+  const now = new Date();
+
+  const indianDate = now.toLocaleDateString("en-IN", {
+    timeZone: "Asia/Kolkata",
   });
+
+  const indianTime = now.toLocaleTimeString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+
+  res.send(`we are 19 — Date: ${indianDate}, Time: ${indianTime}`);
+});
+
 
   app.use("/product", ProductRoutes);
 
