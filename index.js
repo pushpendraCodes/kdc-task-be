@@ -25,27 +25,6 @@ const fetch = require('node-fetch'); // if using Node 18 or earlier
 const app = express();
 const port = 3000;
 
-let cachedIST = null;
-let lastFetched = 0;
-
-// Function to fetch UTC and convert to IST
-const updateISTTime = async () => {
-  try {
-    const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Kolkata');
-    const data = await response.json();
-
-    cachedIST = new Date(data.datetime); // Already in IST
-    lastFetched = Date.now();
-  } catch (error) {
-    console.error('Failed to fetch IST time from API, using system time.');
-    // Fallback to system time + offset
-    const utcNow = new Date();
-    cachedIST = new Date(utcNow.getTime() + 5.5 * 60 * 60 * 1000);
-    lastFetched = Date.now();
-  }
-};
-
-// API endpoint
 app.get('/', async (req, res) => {
   const now = Date.now();
 
@@ -64,10 +43,6 @@ app.get('/', async (req, res) => {
   });
 });
 
-// Start server
-app.listen(port, () => {
-  console.log(`IST time API running at http://localhost:${port}`);
-});
 
 
 
