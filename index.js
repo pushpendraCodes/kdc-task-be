@@ -25,24 +25,20 @@ const fetch = require('node-fetch'); // if using Node 18 or earlier
 const app = express();
 const port = 3000;
 
-app.get('/', async (req, res) => {
-  const now = Date.now();
+app.get("/", (req, res) => {
+  const now = new Date();
 
-  // Refresh if older than 15 minutes
-  if (!cachedIST || now - lastFetched > 15 * 60 * 1000) {
-    await updateISTTime();
-  }
-
-  // Adjust cached time with elapsed milliseconds
-  const elapsed = now - lastFetched;
-  const adjustedTime = new Date(cachedIST.getTime() + elapsed);
+  // Convert to IST (UTC+5:30)
+  const istOffset = 5.5 * 60 * 60 * 1000;
+  const istTime = new Date(now.getTime() + istOffset - now.getTimezoneOffset() * 60000);
 
   res.json({
-    istTime: adjustedTime.toISOString(),
-    readable: adjustedTime.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+    utc: now.toISOString(),
+    ist: istTime.toISOString(),
+    readableIST: istTime.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+    timestamp: now.getTime()
   });
 });
-
 
 
 
