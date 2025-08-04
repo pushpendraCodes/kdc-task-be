@@ -6,29 +6,26 @@ const port = process.env.PORT || 4000;
 const mongoose = require("mongoose");
 const env = require("dotenv");
 env.config();
-
 const cors = require("cors");
+
+// Mongoose model
 const { Product } = require("./models/Product");
-app.use(express.json({limit: "16kb"}))
-app.use(express.urlencoded({extended: true, limit: "16kb"}))
-app.use(express.json());
+
+// Middleware
+app.use(express.json({ limit: "16kb" }));
+app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cors({
   origin: process.env.CORS_ORIGIN,
   credentials: true,
+}));
 
-}))
-
+// Routes
 const ProductRoutes = require("./routes/ProductRoutes");
+app.use("/product", ProductRoutes);
 
-const express = require('express');
-const fetch = require('node-fetch'); // if using Node 18 or earlier
-const app = express();
-const port = 3000;
-
+// ✅ Server Time API
 app.get("/", (req, res) => {
   const now = new Date();
-
-  // Convert to IST (UTC+5:30)
   const istOffset = 5.5 * 60 * 60 * 1000;
   const istTime = new Date(now.getTime() + istOffset - now.getTimezoneOffset() * 60000);
 
@@ -40,22 +37,22 @@ app.get("/", (req, res) => {
   });
 });
 
-
-
-  app.use("/product", ProductRoutes);
-
-  main().catch((err) => console.log(err));
-
+// ✅ Connect MongoDB
 async function main() {
-  mongoose
-    .connect(process.env.MONGO_DB_URL, { useNewUrlParser: true })
-    .then(() => {
-      console.log("mongo_db connected");
+  try {
+    await mongoose.connect(process.env.MONGO_DB_URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
     });
+    console.log("MongoDB connected");
+  } catch (err) {
+    console.error("MongoDB connection failed:", err);
+  }
 }
+main();
 
-const htttpServer = http.createServer(app);
-htttpServer.listen(port, () => {
-  console.log("Server is running on port 4000");
+// ✅ Start Server
+const httpServer = http.createServer(app);
+httpServer.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
-
