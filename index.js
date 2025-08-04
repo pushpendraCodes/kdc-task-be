@@ -26,16 +26,33 @@ app.use("/product", ProductRoutes);
 // ✅ Server Time API
 app.get("/", (req, res) => {
   const now = new Date();
-  const istOffset = 5.5 * 60 * 60 * 1000;
-  const istTime = new Date(now.getTime() + istOffset - now.getTimezoneOffset() * 60000);
+
+  const options = {
+    timeZone: "Asia/Kolkata",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  };
+
+  // Get the IST time string
+  const istString = now.toLocaleString("en-IN", options); // "04/08/2025, 03:50:30 pm"
+
+  const [datePart, timePart] = istString.split(", ");
+
+  // Convert from "04/08/2025" → "04-08-2025"
+  const formattedDate = datePart.replace(/\//g, "-");
 
   res.json({
-    utc: now.toISOString(),
-    ist: istTime.toISOString(),
-    readableIST: istTime.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
-    timestamp: now.getTime()
+    date: formattedDate,                // "04-08-2025"
+    time: timePart.toUpperCase(),       // "03:50:30 PM"
+    datetime: `${formattedDate} ${timePart.toUpperCase()}` // "04-08-2025 03:50:30 PM"
   });
 });
+
 
 // ✅ Connect MongoDB
 async function main() {
