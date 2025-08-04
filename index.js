@@ -20,23 +20,55 @@ app.use(cors({
 
 const ProductRoutes = require("./routes/ProductRoutes");
 
-app.get("/", (req, res) => {
-  const now = new Date();
+const express = require('express');
+const fetch = require('node-fetch'); // if using Node 18 or earlier
+const app = express();
+const port = 3000;
 
-  const indianDate = now.toLocaleDateString("en-IN", {
-    timeZone: "Asia/Kolkata",
+let cachedIST = null;
+let lastFetched = 0;
+
+// Function to fetch UTC and convert to IST
+const updateISTTime = async () => {
+  try {
+    const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Kolkata');
+    const data = await response.json();
+
+    cachedIST = new Date(data.datetime); // Already in IST
+    lastFetched = Date.now();
+  } catch (error) {
+    console.error('Failed to fetch IST time from API, using system time.');
+    // Fallback to system time + offset
+    const utcNow = new Date();
+    cachedIST = new Date(utcNow.getTime() + 5.5 * 60 * 60 * 1000);
+    lastFetched = Date.now();
+  }
+};
+
+// API endpoint
+app.get('/', async (req, res) => {
+  const now = Date.now();
+
+  // Refresh if older than 15 minutes
+  if (!cachedIST || now - lastFetched > 15 * 60 * 1000) {
+    await updateISTTime();
+  }
+
+  // Adjust cached time with elapsed milliseconds
+  const elapsed = now - lastFetched;
+  const adjustedTime = new Date(cachedIST.getTime() + elapsed);
+
+  res.json({
+    istTime: adjustedTime.toISOString(),
+    readable: adjustedTime.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
   });
-
-  const indianTime = now.toLocaleTimeString("en-IN", {
-    timeZone: "Asia/Kolkata",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
-
-  res.send(`we are 19 — Date: ${indianDate}, Time: ${indianTime}`);
 });
+
+// Start server
+app.listen(port, () => {
+  console.log(`IST time API running at http://localhost:${port}`);
+});
+
 
 
   app.use("/product", ProductRoutes);
